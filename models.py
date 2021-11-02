@@ -10,7 +10,7 @@ class Company(Base):
     id              = Column(Integer, primary_key=True, index=True)
     created_at      = Column(DateTime)
     owner_name      = Column(String)
-    name            = Column(String, unique=True, index=True)
+    name            = Column(String)
     owner_email     = Column(String, unique=True, index=True)
     owner_password  = Column(String)
     products        = relationship("Product", back_populates="company")

@@ -14,11 +14,8 @@ app = _fastapi.FastAPI()
 
 @app.post("/companies", response_model=schemas.Company)
 def create_company(company: schemas.CompanyCreate, db: orm.Session=_fastapi.Depends(services.get_db)):
-    db_name= services.get_company_by_name(db=db, name=company.name)
     db_email= services.get_company_by_email(db=db, email=company.owner_email)
-    if db_name:
-        raise _fastapi.HTTPException(status_code=400, detail="the company name is exist")
-    elif db_email:
+    if db_email:
         raise _fastapi.HTTPException(status_code=400, detail="the email is in use")
     return services.create_company(db=db, company=company)
 
