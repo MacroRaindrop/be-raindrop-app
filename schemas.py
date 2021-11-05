@@ -73,7 +73,7 @@ class ProductBase(BaseModel):
         orm_mode: True
 
 class ProductCreate(BaseModel):
-    id_company      :str = Field(..., example="SAD8979aw7(S7")
+    id_company      :int = Field(..., example=1)
     name            :str = Field(..., example="shampoo")
     minimum_stock   :int = Field(..., example=10)
     image           :str = Field(..., example="https://asd.com/img.png")

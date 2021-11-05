@@ -34,3 +34,7 @@ def login_company(company: schemas.CompanyLogin, db: orm.Session=_fastapi.Depend
         owner_email=db_company.owner_email,
     )
     return db_company
+
+@app.post("/products", response_model=schemas.ProductBase)
+def create_product(product: schemas.ProductCreate, db: orm.Session=_fastapi.Depends(services.get_db)):
+    return services.create_product(db=db, product=product)
