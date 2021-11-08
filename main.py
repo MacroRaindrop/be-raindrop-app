@@ -62,5 +62,13 @@ def get_products_by_user(user_id: int, db: orm.Session=_fastapi.Depends(services
     return product
 
 @app.put("/products", response_model=schemas.ProductBase)
-def create_product(product: schemas.ProductCreate, db: orm.Session=_fastapi.Depends(services.get_db)):
+def update_product(product: schemas.ProductBase, db: orm.Session=_fastapi.Depends(services.get_db)):
     return services.update_product(db=db, product=product)
+
+
+@app.delete("/products/{product_id}", response_model=schemas.ProductBase)
+def delete_product(product_id: int, db: orm.Session=_fastapi.Depends(services.get_db)):
+    product = services.delete_product(id=product_id, db=db)
+    if product is None:
+        raise _fastapi.HTTPException(status_code=400, detail="maaf product tidak ditemukan")
+    return product
