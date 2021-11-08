@@ -10,6 +10,9 @@ class CompanyBase(BaseModel):
     owner_email         :str
     owner_password      :str
 
+    class Config:
+        orm_mode = True
+
 class CompanyCreate(BaseModel):
     owner_name      :str = Field(..., example="agnii")
     name            :str = Field(..., example="raindrop corp.")
@@ -37,8 +40,8 @@ class StaffBase(BaseModel):
     password            :str
     role                :str
 
-    class config: 
-        orm_mode: True
+    class Config:
+        orm_mode = True
 
 class StaffCreate(BaseModel):
     id_company      :str = Field(..., example="089asdf89h920")
@@ -55,13 +58,13 @@ class Staff(BaseModel):
     email               :str
     role                :str
 
-    class config: 
-        orm_mode: True
+    class Config:
+        orm_mode = True
 
 class ProductBase(BaseModel):
-    id                  :str
+    id                  :int
     created_at          :datetime
-    id_company          :str
+    id_company          :int
     name                :str
     minimum_stock       :int
     image               :str
@@ -69,8 +72,8 @@ class ProductBase(BaseModel):
     description         :str
     quantity            :int
 
-    class config: 
-        orm_mode: True
+    class Config:
+        orm_mode = True
 
 class ProductCreate(BaseModel):
     id_company      :int = Field(..., example=1)
@@ -91,8 +94,8 @@ class HistoryBase(BaseModel):
     unit                :str
     notes               :str
 
-    class config: 
-        orm_mode: True
+    class Config:
+        orm_mode = True
 
 class HistoryCreate(BaseModel):
     id_company      :str = Field(..., example="089asdf89h920")
@@ -112,8 +115,8 @@ class PreOrderBase(BaseModel):
     date                :str
     quantity            :int
 
-    class config: 
-        orm_mode: True
+    class Config:
+        orm_mode = True
 
 class PreOrderCreate(BaseModel):
     id_company      :str = Field(..., example="089asdf89h920")
@@ -129,8 +132,8 @@ class LogBase(BaseModel):
     id_company          :str
     id_staff            :str
 
-    class config: 
-        orm_mode: True
+    class Config:
+        orm_mode = True
 
 class LogCreate(BaseModel):
     id_company      :str = Field(..., example="089asdf89h920")

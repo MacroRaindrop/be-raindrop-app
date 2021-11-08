@@ -68,3 +68,9 @@ def create_product(db: Session, product: schemas.ProductCreate ):
         quantity=db_product.quantity
     )
     return db_product
+
+def get_products(db: Session, skip:int, limit:int):
+    return db.query(models.Product).offset(skip).limit(limit).all()
+
+def get_product(db: Session, id: int):
+    return db.query(models.Product).filter(models.Product.id == id).first()

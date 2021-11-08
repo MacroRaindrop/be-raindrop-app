@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from typing import List
 import fastapi as _fastapi
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -38,3 +38,16 @@ def login_company(company: schemas.CompanyLogin, db: orm.Session=_fastapi.Depend
 @app.post("/products", response_model=schemas.ProductBase)
 def create_product(product: schemas.ProductCreate, db: orm.Session=_fastapi.Depends(services.get_db)):
     return services.create_product(db=db, product=product)
+
+@app.get("/products", response_model=List[schemas.ProductBase])
+def get_products(skip: int = 0, limit: int = 10, db: orm.Session=_fastapi.Depends(services.get_db)):
+    products = services.get_products(db=db, skip=skip, limit=limit)
+    print(products)
+    return products
+
+@app.get("/products/{user_id}", response_model=schemas.ProductBase)
+def get_product(user_id: int, db: orm.Session=_fastapi.Depends(services.get_db)):
+    product = services.get_product(id=user_id, db=db)
+    if product is None:
+        raise _fastapi.HTTPException(status_code=400, detail="maaf product tidak ditemukan")
+    return product
