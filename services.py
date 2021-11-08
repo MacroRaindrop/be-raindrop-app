@@ -41,3 +41,36 @@ def create_company(db: Session, company: schemas.CompanyCreate ):
         owner_email=db_company.owner_email,
     )
     return db_company
+
+def create_product(db: Session, product: schemas.ProductCreate ):
+    db_product = models.Product(
+        created_at=datetime.now(),
+        id_company=product.id_company,
+        name=product.name,
+        minimum_stock=product.minimum_stock,
+        image=product.image,
+        unit=product.unit,
+        description=product.description,
+        quantity=product.quantity
+    )
+    db.add(db_product)
+    db.commit()
+    db.refresh(db_product)
+    db_product = schemas.ProductBase(
+        id=db_product.id,
+        created_at=db_product.created_at,
+        id_company=db_product.id_company,
+        name=db_product.name,
+        minimum_stock=db_product.minimum_stock,
+        image=db_product.image,
+        unit=db_product.unit,
+        description=db_product.description,
+        quantity=db_product.quantity
+    )
+    return db_product
+
+def get_products(db: Session, skip:int, limit:int):
+    return db.query(models.Product).offset(skip).limit(limit).all()
+
+def get_product(db: Session, id: int):
+    return db.query(models.Product).filter(models.Product.id == id).first()
