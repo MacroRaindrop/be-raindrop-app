@@ -96,3 +96,9 @@ def update_product(db: Session, product: schemas.ProductBase):
     )
     product =  db.query(models.Product).filter(models.Product.id == product.id).first()
     return product
+
+def delete_product(db: Session, id: int):
+    product =  db.query(models.Product).filter(models.Product.id == id).first()
+    db.delete(product)
+    db.commit()
+    return product
