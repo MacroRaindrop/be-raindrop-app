@@ -1,3 +1,4 @@
+from sqlalchemy.sql.expression import update
 import database
 import models
 from sqlalchemy.orm import Session
@@ -33,12 +34,13 @@ def create_company(db: Session, company: schemas.CompanyCreate ):
     db.add(db_company)
     db.commit()
     db.refresh(db_company)
-    db_company = schemas.Company(
+    db_company = schemas.CompanyBase(
         id=db_company.id,
         created_at=db_company.created_at,
         owner_name=db_company.owner_name,
         name=db_company.name,
         owner_email=db_company.owner_email,
+        owner_password=db_company.owner_password
     )
     return db_company
 
@@ -74,3 +76,23 @@ def get_products(db: Session, skip:int, limit:int):
 
 def get_product(db: Session, id: int):
     return db.query(models.Product).filter(models.Product.id == id).first()
+
+def get_products_by_user(db: Session, id: int):
+    return db.query(models.Product).filter(models.Product.id_company == id).all()
+
+def update_product(db: Session, product: schemas.ProductBase):
+    db.execute(
+        update(models.Product).
+        where(models.Product.id == product.id).
+        values(
+            id_company=product.id_company,
+            name=product.name,
+            minimum_stock=product.minimum_stock,
+            image=product.image,
+            unit=product.unit,
+            description=product.description,
+            quantity=product.quantity
+        )
+    )
+    product =  db.query(models.Product).filter(models.Product.id == product.id).first()
+    return product
