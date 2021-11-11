@@ -94,6 +94,7 @@ def update_product(db: Session, product: schemas.ProductBase):
             quantity=product.quantity
         )
     )
+    db.commit()
     product =  db.query(models.Product).filter(models.Product.id == product.id).first()
     return product
 
