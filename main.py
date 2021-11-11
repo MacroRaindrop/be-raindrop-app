@@ -14,7 +14,7 @@ import schemas
 app = _fastapi.FastAPI()
 
 @app.get("/", response_class=HTMLResponse)
-async def get_root():
+def get_root():
     return """<!DOCTYPE html>
     <html lang="en">
     <head>
@@ -31,16 +31,21 @@ async def get_root():
     </body>
     </html>"""
 
+@app.get("/companies-pic")
+def get_company_pic(company_id: int, db: orm.Session=_fastapi.Depends(services.get_db)):
+    pic =  services.get_company_by_id(db=db, id=company_id)
+    return pic.owner_name
+
 @app.post("/companies", response_model=schemas.CompanyBase)
-async def create_company(company: schemas.CompanyCreate, db: orm.Session=_fastapi.Depends(services.get_db)):
-    db_email = await services.get_company_by_email(db=db, email=company.owner_email)
+def create_company(company: schemas.CompanyCreate, db: orm.Session=_fastapi.Depends(services.get_db)):
+    db_email =  services.get_company_by_email(db=db, email=company.owner_email)
     if db_email:
         raise _fastapi.HTTPException(status_code=400, detail="the email is in use")
     return services.create_company(db=db, company=company)
 
 @app.post("/login", response_model=schemas.CompanyBase)
-async def login_company(company: schemas.CompanyLogin, db: orm.Session=_fastapi.Depends(services.get_db)):
-    db_company = await services.get_company_by_email(db=db, email=company.owner_email)
+def login_company(company: schemas.CompanyLogin, db: orm.Session=_fastapi.Depends(services.get_db)):
+    db_company =  services.get_company_by_email(db=db, email=company.owner_email)
     if not db_company:
         raise _fastapi.HTTPException(status_code=400, detail="the company is not found")
     if db_company.owner_password!=company.owner_password:
@@ -56,36 +61,36 @@ async def login_company(company: schemas.CompanyLogin, db: orm.Session=_fastapi.
     return db_company
 
 @app.post("/products", response_model=schemas.ProductBase)
-async def create_product(product: schemas.ProductCreate, db: orm.Session=_fastapi.Depends(services.get_db)):
-    return await services.create_product(db=db, product=product)
+def create_product(product: schemas.ProductCreate, db: orm.Session=_fastapi.Depends(services.get_db)):
+    return  services.create_product(db=db, product=product)
 
 @app.get("/products", response_model=List[schemas.ProductBase])
-async def get_products(skip: int = 0, limit: int = 10, db: orm.Session=_fastapi.Depends(services.get_db)):
-    products = await services.get_products(db=db, skip=skip, limit=limit)
+def get_products(skip: int = 0, limit: int = 10, db: orm.Session=_fastapi.Depends(services.get_db)):
+    products =  services.get_products(db=db, skip=skip, limit=limit)
     print(products)
     return products
 
 @app.get("/products/{product_id}", response_model=schemas.ProductBase)
-async def get_product(product_id: int, db: orm.Session=_fastapi.Depends(services.get_db)):
-    product = await services.get_product(id=product_id, db=db)
+def get_product(product_id: int, db: orm.Session=_fastapi.Depends(services.get_db)):
+    product =  services.get_product(id=product_id, db=db)
     if product is None:
         raise _fastapi.HTTPException(status_code=400, detail="maaf product tidak ditemukan")
     return product
 
 @app.get("/products-user/{user_id}", response_model=List[schemas.ProductBase])
-async def get_products_by_user(user_id: int, db: orm.Session=_fastapi.Depends(services.get_db)):
-    product = await services.get_products_by_user(id=user_id, db=db)
+def get_products_by_user(user_id: int, db: orm.Session=_fastapi.Depends(services.get_db)):
+    product =  services.get_products_by_user(id=user_id, db=db)
     if product is None:
         raise _fastapi.HTTPException(status_code=400, detail="maaf product tidak ditemukan")
     return product
 
 @app.put("/products", response_model=schemas.ProductBase)
-async def update_product(product: schemas.ProductBase, db: orm.Session=_fastapi.Depends(services.get_db)):
-    return await services.update_product(db=db, product=product)
+def update_product(product: schemas.ProductBase, db: orm.Session=_fastapi.Depends(services.get_db)):
+    return  services.update_product(db=db, product=product)
 
 @app.delete("/products/{product_id}", response_model=schemas.ProductBase)
-async def delete_product(product_id: int, db: orm.Session=_fastapi.Depends(services.get_db)):
-    product = await services.delete_product(id=product_id, db=db)
+def delete_product(product_id: int, db: orm.Session=_fastapi.Depends(services.get_db)):
+    product =  services.delete_product(id=product_id, db=db)
     if product is None:
         raise _fastapi.HTTPException(status_code=400, detail="maaf product tidak ditemukan")
     return product
