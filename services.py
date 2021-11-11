@@ -22,6 +22,9 @@ def get_company_by_name(db: Session, name: str):
 def get_company_by_email(db: Session, email: str):
     return db.query(models.Company).filter(models.Company.owner_email == email).first()
 
+def get_company_by_id(db: Session, id: int):
+    return db.query(models.Company).filter(models.Company.id == id).first()
+
 def create_company(db: Session, company: schemas.CompanyCreate ):
     fake_hashed_password = company.owner_password + "thisisnotsecured"
     db_company = models.Company(
