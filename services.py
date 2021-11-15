@@ -106,3 +106,32 @@ def delete_product(db: Session, id: int):
     db.delete(product)
     db.commit()
     return product
+
+def get_pics(db: Session, id:int):
+    return db.query(models.Staff).filter(models.Staff.id_company == id).all()
+    
+def get_owner_name(db: Session, id: int):
+    return db.query(models.Company).filter(models.Company.id == id).first()
+
+def create_staff(db: Session, staff: schemas.StaffCreate):
+    db_staff = models.Staff(
+        created_at=datetime.now(),
+        id_company=staff.id_company,
+        name=staff.name,
+        email=staff.email,
+        password=staff.password,
+        role=staff.role
+    )
+    db.add(db_staff)
+    db.commit()
+    db.refresh(db_staff)
+    db_staff = schemas.StaffBase(
+        id=db_staff.id,
+        created_at=db_staff.created_at,
+        id_company=db_staff.id_company,
+        name=db_staff.name,
+        email=db_staff.email,
+        password=db_staff.password,
+        role=db_staff.role
+    )
+    return db_staff
