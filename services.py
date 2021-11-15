@@ -1,4 +1,4 @@
-from sqlalchemy.sql.expression import update
+from sqlalchemy.sql.expression import null, update
 import database
 import models
 from sqlalchemy.orm import Session
@@ -107,12 +107,9 @@ def delete_product(db: Session, id: int):
     db.commit()
     return product
 
-def get_pics(db: Session, id:int):
+def get_staff(db: Session, id:int):
     return db.query(models.Staff).filter(models.Staff.id_company == id).all()
     
-def get_owner_name(db: Session, id: int):
-    return db.query(models.Company).filter(models.Company.id == id).first()
-
 def create_staff(db: Session, staff: schemas.StaffCreate):
     db_staff = models.Staff(
         created_at=datetime.now(),
@@ -135,3 +132,38 @@ def create_staff(db: Session, staff: schemas.StaffCreate):
         role=db_staff.role
     )
     return db_staff
+
+def create_preorder(db: Session, preorder: schemas.PreOrderCreate):
+    preorders = db.query(models.Preorder).filter(models.Preorder.id_company==preorder.id_company).all()
+    if not preorders:
+        id = 1
+    else:
+        id = preorders[-1].id_preorder + 1
+    db_preorder = models.Preorder(
+        created_at=datetime.now(),
+        id_preorder=id,
+        id_company=preorder.id_company,
+        id_product=preorder.id_product,
+        id_staff=preorder.id_staff,
+        supplier=preorder.supplier,
+        date=preorder.date,
+        quantity=preorder.quantity
+    )
+    db.add(db_preorder)
+    db.commit()
+    db.refresh(db_preorder)
+    db_preorder = schemas.PreOrderBase(
+        id=db_preorder.id,
+        created_at=db_preorder.created_at,
+        id_preorder=db_preorder.id_preorder,
+        id_company=db_preorder.id_company,
+        id_product=db_preorder.id_product,
+        id_staff=db_preorder.id_staff,
+        supplier=db_preorder.supplier,
+        date=db_preorder.date,
+        quantity=db_preorder.quantity
+    )
+    return db_preorder
+
+def get_preorders(db: Session):
+    return db.query(models.Preorder).all()

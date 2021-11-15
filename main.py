@@ -54,7 +54,7 @@ def login_company(company: schemas.CompanyLogin, db: orm.Session=_fastapi.Depend
     )
     return db_company
 
-@app.get("/companies-pic")
+@app.get("/company-pic")
 def get_company_pic(company_id: int, db: orm.Session=_fastapi.Depends(services.get_db)):
     pic =  services.get_company_by_id(db=db, id=company_id)
     return pic.owner_name
@@ -93,3 +93,15 @@ def delete_product(product_id: int, db: orm.Session=_fastapi.Depends(services.ge
     if product is None:
         raise _fastapi.HTTPException(status_code=400, detail="maaf product tidak ditemukan")
     return product
+
+@app.get("/company-staff", response_model=List[schemas.StaffBase])
+def get_company_staff(company_id: int, db: orm.Session=_fastapi.Depends(services.get_db)):
+    return services.get_staff(id=company_id, db=db)
+
+@app.post("/staff", response_model=schemas.StaffBase)
+def create_staff(staff: schemas.StaffCreate, db: orm.Session=_fastapi.Depends(services.get_db)):
+    return services.create_staff(staff=staff, db=db)
+
+@app.post("/preorders", response_model=schemas.PreOrderBase)
+def create_preorder(preorder: schemas.PreOrderCreate, db: orm.Session=_fastapi.Depends(services.get_db)):
+    return services.create_preorder(preorder=preorder, db=db)

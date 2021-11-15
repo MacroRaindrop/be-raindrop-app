@@ -49,7 +49,7 @@ class Product(Base):
 
 class History(Base):
     __tablename__ = 'history'
-    id              = Column(String, primary_key=True)
+    id              = Column(Integer, primary_key=True)
     created_at      = Column(DateTime)
     id_company      = Column(Integer, ForeignKey('company.id'))
     company         = relationship("Company", back_populates="histories")
@@ -62,8 +62,9 @@ class History(Base):
 
 class Preorder(Base):
     __tablename__ = 'preorder'
-    id              = Column(String, primary_key=True)
+    id              = Column(Integer, primary_key=True)
     created_at      = Column(DateTime)
+    id_preorder     = Column(Integer)
     id_company      = Column(Integer, ForeignKey('company.id'))
     company         = relationship("Company", back_populates="preorders")
     id_product      = Column(Integer, ForeignKey('product.id'))
