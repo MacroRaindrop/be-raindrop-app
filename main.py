@@ -102,11 +102,11 @@ def get_company_staff(company_id: int, db: orm.Session=_fastapi.Depends(services
 def create_staff(staff: schemas.StaffCreate, db: orm.Session=_fastapi.Depends(services.get_db)):
     return services.create_staff(staff=staff, db=db)
 
-@app.post("/purchaseorders", response_model=schemas.PurchaseOrderBase)
+@app.post("/purchaseorders", response_model=schemas.PurchaseOrderCreate)
 def create_purchaseorder(purchaseorder: schemas.PurchaseOrderCreate, db: orm.Session=_fastapi.Depends(services.get_db)):
     return services.create_purchaseorder(purchaseorder=purchaseorder, db=db)
 
-@app.get("/purchaseorders", response_model=List[schemas.PurchaseOrderBase])
+@app.get("/purchaseorders", response_model=schemas.PurchaseOrderBase)
 def get_purchaseorders_by_company(company_id: int, db: orm.Session=_fastapi.Depends(services.get_db)):
     purchaseorders = services.get_purchaseorders(db=db, id=company_id)
     if not purchaseorders:

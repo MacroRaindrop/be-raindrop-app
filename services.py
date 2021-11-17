@@ -134,20 +134,18 @@ def create_staff(db: Session, staff: schemas.StaffCreate):
     return db_staff
 
 def create_purchaseorder(db: Session, purchaseorder: schemas.PurchaseOrderCreate):
-    purchaseorders = db.query(models.Preorder).filter(models.Preorder.id_company==purchaseorder.id_company).all()
+    purchaseorders = db.query(models.Purchaseorder).filter(models.Purchaseorder.id_company==purchaseorder.id_company).all()
     if not purchaseorders:
         id = 1
     else:
         id = purchaseorders[-1].id_purchaseorder + 1
-    db_purchaseorder = models.Preorder(
+    db_purchaseorder = models.Purchaseorder(
         created_at=datetime.now(),
         id_purchaseorder=id,
         id_company=purchaseorder.id_company,
-        id_product=purchaseorder.id_product,
         id_staff=purchaseorder.id_staff,
         supplier=purchaseorder.supplier,
-        date=purchaseorder.date,
-        quantity=purchaseorder.quantity
+        date=purchaseorder.date
     )
     db.add(db_purchaseorder)
     db.commit()
@@ -157,13 +155,22 @@ def create_purchaseorder(db: Session, purchaseorder: schemas.PurchaseOrderCreate
         created_at=db_purchaseorder.created_at,
         id_purchaseorder=db_purchaseorder.id_purchaseorder,
         id_company=db_purchaseorder.id_company,
-        id_product=db_purchaseorder.id_product,
         id_staff=db_purchaseorder.id_staff,
         supplier=db_purchaseorder.supplier,
-        date=db_purchaseorder.date,
-        quantity=db_purchaseorder.quantity
+        date=db_purchaseorder.date
     )
-    return db_purchaseorder
+    purchaseorderdetails = []
+    for i in range(len(purchaseorder.products)):
+        purchaseorderdetail = models.PurchaseorderDetail(
+            id_purchaseorder  = db_purchaseorder.id,
+            id_product        = purchaseorder.products[i].id_product,
+            quantity          = purchaseorder.products[i].quantity
+        )
+        purchaseorderdetails.append(purchaseorderdetail)
+    db.add_all(purchaseorderdetails)
+    db.commit()
+    print(purchaseorderdetails)
+    return purchaseorder
 
 def get_purchaseorders(db: Session, id: int):
-    return db.query(models.Preorder).filter(models.Preorder.id_company==id).all()
+    return db.query(models.Purchaseorder).filter(models.Purchaseorder.id_company==id).all()
