@@ -104,10 +104,10 @@ class HistoryCreate(BaseModel):
     unit            :str
     notes           :str
 
-class PreOrderBase(BaseModel):
+class PurchaseOrderBase(BaseModel):
     id                  :int
     created_at          :datetime
-    id_preorder         :int
+    id_purchaseorder         :int
     id_company          :int
     id_product          :int
     id_staff            :int
@@ -118,7 +118,7 @@ class PreOrderBase(BaseModel):
     class Config:
         orm_mode = True
 
-class PreOrderCreate(BaseModel):
+class PurchaseOrderCreate(BaseModel):
     id_company      :int
     id_product      :int
     id_staff        :int

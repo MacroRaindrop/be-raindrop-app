@@ -16,7 +16,7 @@ class Company(Base):
     products        = relationship("Product", back_populates="company")
     staff           = relationship("Staff", back_populates="company")
     histories       = relationship("History", back_populates="company")
-    preorders       = relationship("Preorder", back_populates="company")
+    purchaseorders       = relationship("Preorder", back_populates="company")
     logs            = relationship("Log", back_populates="company")
 
 class Staff(Base):
@@ -29,7 +29,7 @@ class Staff(Base):
     email           = Column(String, unique=True, index=True)
     password        = Column(String)
     role            = Column(String)
-    preorders       = relationship("Preorder", back_populates="staff")
+    purchaseorders       = relationship("Preorder", back_populates="staff")
     logs            = relationship("Log", back_populates="staff")
 
 class Product(Base):
@@ -45,7 +45,7 @@ class Product(Base):
     description     = Column(String)
     quantity        = Column(Integer)
     histories       = relationship("History", back_populates="products")
-    preorders       = relationship("Preorder", back_populates="products")
+    purchaseorders       = relationship("Preorder", back_populates="products")
 
 class History(Base):
     __tablename__ = 'history'
@@ -61,16 +61,16 @@ class History(Base):
     notes           = Column(String)
 
 class Preorder(Base):
-    __tablename__ = 'preorder'
+    __tablename__ = 'purchaseorder'
     id              = Column(Integer, primary_key=True)
     created_at      = Column(DateTime)
-    id_preorder     = Column(Integer)
+    id_purchaseorder     = Column(Integer)
     id_company      = Column(Integer, ForeignKey('company.id'))
-    company         = relationship("Company", back_populates="preorders")
+    company         = relationship("Company", back_populates="purchaseorders")
     id_product      = Column(Integer, ForeignKey('product.id'))
-    products        = relationship("Product", back_populates="preorders")
+    products        = relationship("Product", back_populates="purchaseorders")
     id_staff        = Column(Integer, ForeignKey('staff.id'))
-    staff           = relationship("Staff", back_populates="preorders")
+    staff           = relationship("Staff", back_populates="purchaseorders")
     supplier        = Column(String)
     date            = Column(String)
     quantity        = Column(Integer)

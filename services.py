@@ -133,37 +133,37 @@ def create_staff(db: Session, staff: schemas.StaffCreate):
     )
     return db_staff
 
-def create_preorder(db: Session, preorder: schemas.PreOrderCreate):
-    preorders = db.query(models.Preorder).filter(models.Preorder.id_company==preorder.id_company).all()
-    if not preorders:
+def create_purchaseorder(db: Session, purchaseorder: schemas.PurchaseOrderCreate):
+    purchaseorders = db.query(models.Preorder).filter(models.Preorder.id_company==purchaseorder.id_company).all()
+    if not purchaseorders:
         id = 1
     else:
-        id = preorders[-1].id_preorder + 1
-    db_preorder = models.Preorder(
+        id = purchaseorders[-1].id_purchaseorder + 1
+    db_purchaseorder = models.Preorder(
         created_at=datetime.now(),
-        id_preorder=id,
-        id_company=preorder.id_company,
-        id_product=preorder.id_product,
-        id_staff=preorder.id_staff,
-        supplier=preorder.supplier,
-        date=preorder.date,
-        quantity=preorder.quantity
+        id_purchaseorder=id,
+        id_company=purchaseorder.id_company,
+        id_product=purchaseorder.id_product,
+        id_staff=purchaseorder.id_staff,
+        supplier=purchaseorder.supplier,
+        date=purchaseorder.date,
+        quantity=purchaseorder.quantity
     )
-    db.add(db_preorder)
+    db.add(db_purchaseorder)
     db.commit()
-    db.refresh(db_preorder)
-    db_preorder = schemas.PreOrderBase(
-        id=db_preorder.id,
-        created_at=db_preorder.created_at,
-        id_preorder=db_preorder.id_preorder,
-        id_company=db_preorder.id_company,
-        id_product=db_preorder.id_product,
-        id_staff=db_preorder.id_staff,
-        supplier=db_preorder.supplier,
-        date=db_preorder.date,
-        quantity=db_preorder.quantity
+    db.refresh(db_purchaseorder)
+    db_purchaseorder = schemas.PurchaseOrderBase(
+        id=db_purchaseorder.id,
+        created_at=db_purchaseorder.created_at,
+        id_purchaseorder=db_purchaseorder.id_purchaseorder,
+        id_company=db_purchaseorder.id_company,
+        id_product=db_purchaseorder.id_product,
+        id_staff=db_purchaseorder.id_staff,
+        supplier=db_purchaseorder.supplier,
+        date=db_purchaseorder.date,
+        quantity=db_purchaseorder.quantity
     )
-    return db_preorder
+    return db_purchaseorder
 
-def get_preorders(db: Session):
-    return db.query(models.Preorder).all()
+def get_purchaseorders(db: Session, id: int):
+    return db.query(models.Preorder).filter(models.Preorder.id_company==id).all()
