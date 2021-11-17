@@ -1,4 +1,4 @@
-from sqlalchemy.sql.expression import update
+from sqlalchemy.sql.expression import null, update
 import database
 import models
 from sqlalchemy.orm import Session
@@ -106,3 +106,71 @@ def delete_product(db: Session, id: int):
     db.delete(product)
     db.commit()
     return product
+
+def get_staff(db: Session, id:int):
+    return db.query(models.Staff).filter(models.Staff.id_company == id).all()
+    
+def create_staff(db: Session, staff: schemas.StaffCreate):
+    db_staff = models.Staff(
+        created_at=datetime.now(),
+        id_company=staff.id_company,
+        name=staff.name,
+        email=staff.email,
+        password=staff.password,
+        role=staff.role
+    )
+    db.add(db_staff)
+    db.commit()
+    db.refresh(db_staff)
+    db_staff = schemas.StaffBase(
+        id=db_staff.id,
+        created_at=db_staff.created_at,
+        id_company=db_staff.id_company,
+        name=db_staff.name,
+        email=db_staff.email,
+        password=db_staff.password,
+        role=db_staff.role
+    )
+    return db_staff
+
+def create_purchaseorder(db: Session, purchaseorder: schemas.PurchaseOrderCreate):
+    purchaseorders = db.query(models.Purchaseorder).filter(models.Purchaseorder.id_company==purchaseorder.id_company).all()
+    if not purchaseorders:
+        id = 1
+    else:
+        id = purchaseorders[-1].id_purchaseorder + 1
+    db_purchaseorder = models.Purchaseorder(
+        created_at=datetime.now(),
+        id_purchaseorder=id,
+        id_company=purchaseorder.id_company,
+        id_staff=purchaseorder.id_staff,
+        supplier=purchaseorder.supplier,
+        date=purchaseorder.date
+    )
+    db.add(db_purchaseorder)
+    db.commit()
+    db.refresh(db_purchaseorder)
+    db_purchaseorder = schemas.PurchaseOrderBase(
+        id=db_purchaseorder.id,
+        created_at=db_purchaseorder.created_at,
+        id_purchaseorder=db_purchaseorder.id_purchaseorder,
+        id_company=db_purchaseorder.id_company,
+        id_staff=db_purchaseorder.id_staff,
+        supplier=db_purchaseorder.supplier,
+        date=db_purchaseorder.date
+    )
+    purchaseorderdetails = []
+    for i in range(len(purchaseorder.products)):
+        purchaseorderdetail = models.PurchaseorderDetail(
+            id_purchaseorder  = db_purchaseorder.id,
+            id_product        = purchaseorder.products[i].id_product,
+            quantity          = purchaseorder.products[i].quantity
+        )
+        purchaseorderdetails.append(purchaseorderdetail)
+    db.add_all(purchaseorderdetails)
+    db.commit()
+    print(purchaseorderdetails)
+    return purchaseorder
+
+def get_purchaseorders(db: Session, id: int):
+    return db.query(models.Purchaseorder).filter(models.Purchaseorder.id_company==id).all()

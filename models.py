@@ -1,5 +1,5 @@
 import sqlalchemy as _sql
-from sqlalchemy import Column, String, Integer, ForeignKey, DateTime
+from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, PrimaryKeyConstraint
 import sqlalchemy.orm as _orm 
 from sqlalchemy.orm import relationship
 
@@ -16,7 +16,7 @@ class Company(Base):
     products        = relationship("Product", back_populates="company")
     staff           = relationship("Staff", back_populates="company")
     histories       = relationship("History", back_populates="company")
-    preorders       = relationship("Preorder", back_populates="company")
+    purchaseorders       = relationship("Purchaseorder", back_populates="company")
     logs            = relationship("Log", back_populates="company")
 
 class Staff(Base):
@@ -29,7 +29,7 @@ class Staff(Base):
     email           = Column(String, unique=True, index=True)
     password        = Column(String)
     role            = Column(String)
-    preorders       = relationship("Preorder", back_populates="staff")
+    purchaseorders       = relationship("Purchaseorder", back_populates="staff")
     logs            = relationship("Log", back_populates="staff")
 
 class Product(Base):
@@ -45,11 +45,11 @@ class Product(Base):
     description     = Column(String)
     quantity        = Column(Integer)
     histories       = relationship("History", back_populates="products")
-    preorders       = relationship("Preorder", back_populates="products")
+    purchaseorderdetails       = relationship("PurchaseorderDetail", back_populates="products")
 
 class History(Base):
     __tablename__ = 'history'
-    id              = Column(String, primary_key=True)
+    id              = Column(Integer, primary_key=True, index=True)
     created_at      = Column(DateTime)
     id_company      = Column(Integer, ForeignKey('company.id'))
     company         = relationship("Company", back_populates="histories")
@@ -60,23 +60,31 @@ class History(Base):
     unit            = Column(Integer)
     notes           = Column(String)
 
-class Preorder(Base):
-    __tablename__ = 'preorder'
-    id              = Column(String, primary_key=True)
-    created_at      = Column(DateTime)
-    id_company      = Column(Integer, ForeignKey('company.id'))
-    company         = relationship("Company", back_populates="preorders")
-    id_product      = Column(Integer, ForeignKey('product.id'))
-    products        = relationship("Product", back_populates="preorders")
-    id_staff        = Column(Integer, ForeignKey('staff.id'))
-    staff           = relationship("Staff", back_populates="preorders")
-    supplier        = Column(String)
-    date            = Column(String)
-    quantity        = Column(Integer)
+class Purchaseorder(Base):
+    __tablename__        = 'purchaseorder'
+    id                   = Column(Integer, primary_key=True, index=True)
+    created_at           = Column(DateTime)
+    id_purchaseorder     = Column(Integer)
+    id_company           = Column(Integer, ForeignKey('company.id'))
+    company              = relationship("Company", back_populates="purchaseorders")
+    id_staff             = Column(Integer, ForeignKey('staff.id'))
+    staff                = relationship("Staff", back_populates="purchaseorders")
+    supplier             = Column(String)
+    date                 = Column(String)
+    purchaseorderdetails = relationship("PurchaseorderDetail", back_populates="purchaseorders")
+
+class PurchaseorderDetail(Base):
+    __tablename__        = 'purchaseorder_detail'
+    id                   = Column(Integer, primary_key=True, index=True)
+    id_purchaseorder     = Column(Integer, ForeignKey('purchaseorder.id'))
+    purchaseorders       = relationship("Purchaseorder", back_populates="purchaseorderdetails")
+    id_product           = Column(Integer, ForeignKey('product.id'))
+    products             = relationship("Product", back_populates="purchaseorderdetails")
+    quantity             = Column(Integer)
 
 class Log(Base):
     __tablename__ = 'log'
-    id              = Column(Integer, primary_key=True)
+    id              = Column(Integer, primary_key=True, index=True)
     created_at      = Column(DateTime)
     id_company      = Column(Integer, ForeignKey('company.id'))
     company         = relationship("Company", back_populates="logs")

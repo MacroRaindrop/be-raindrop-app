@@ -10,7 +10,6 @@ import sqlalchemy.orm as orm
 
 import schemas
 
-
 app = _fastapi.FastAPI()
 
 @app.get("/", response_class=HTMLResponse)
@@ -30,11 +29,6 @@ def get_root():
         <a href="https://be-raindrop-app.herokuapp.com/docs">Interactive API Documentation</a>
     </body>
     </html>"""
-
-@app.get("/companies-pic")
-def get_company_pic(company_id: int, db: orm.Session=_fastapi.Depends(services.get_db)):
-    pic =  services.get_company_by_id(db=db, id=company_id)
-    return pic.owner_name
 
 @app.post("/companies", response_model=schemas.CompanyBase)
 def create_company(company: schemas.CompanyCreate, db: orm.Session=_fastapi.Depends(services.get_db)):
@@ -60,9 +54,10 @@ def login_company(company: schemas.CompanyLogin, db: orm.Session=_fastapi.Depend
     )
     return db_company
 
-@app.post("/products", response_model=schemas.ProductBase)
-def create_product(product: schemas.ProductCreate, db: orm.Session=_fastapi.Depends(services.get_db)):
-    return  services.create_product(db=db, product=product)
+@app.get("/company-pic")
+def get_company_pic(company_id: int, db: orm.Session=_fastapi.Depends(services.get_db)):
+    pic =  services.get_company_by_id(db=db, id=company_id)
+    return pic.owner_name
 
 @app.get("/products", response_model=List[schemas.ProductBase])
 def get_products(skip: int = 0, limit: int = 10, db: orm.Session=_fastapi.Depends(services.get_db)):
@@ -84,6 +79,10 @@ def get_products_by_user(user_id: int, db: orm.Session=_fastapi.Depends(services
         raise _fastapi.HTTPException(status_code=400, detail="maaf product tidak ditemukan")
     return product
 
+@app.post("/products", response_model=schemas.ProductBase)
+def create_product(product: schemas.ProductCreate, db: orm.Session=_fastapi.Depends(services.get_db)):
+    return  services.create_product(db=db, product=product)
+
 @app.put("/products", response_model=schemas.ProductBase)
 def update_product(product: schemas.ProductBase, db: orm.Session=_fastapi.Depends(services.get_db)):
     return  services.update_product(db=db, product=product)
@@ -94,3 +93,22 @@ def delete_product(product_id: int, db: orm.Session=_fastapi.Depends(services.ge
     if product is None:
         raise _fastapi.HTTPException(status_code=400, detail="maaf product tidak ditemukan")
     return product
+
+@app.get("/company-staff", response_model=List[schemas.StaffBase])
+def get_company_staff(company_id: int, db: orm.Session=_fastapi.Depends(services.get_db)):
+    return services.get_staff(id=company_id, db=db)
+
+@app.post("/staff", response_model=schemas.StaffBase)
+def create_staff(staff: schemas.StaffCreate, db: orm.Session=_fastapi.Depends(services.get_db)):
+    return services.create_staff(staff=staff, db=db)
+
+@app.post("/purchaseorders", response_model=schemas.PurchaseOrderCreate)
+def create_purchaseorder(purchaseorder: schemas.PurchaseOrderCreate, db: orm.Session=_fastapi.Depends(services.get_db)):
+    return services.create_purchaseorder(purchaseorder=purchaseorder, db=db)
+
+@app.get("/purchaseorders", response_model=schemas.PurchaseOrderBase)
+def get_purchaseorders_by_company(company_id: int, db: orm.Session=_fastapi.Depends(services.get_db)):
+    purchaseorders = services.get_purchaseorders(db=db, id=company_id)
+    if not purchaseorders:
+        raise _fastapi.HTTPException(status_code=400, detail="perusahaan belum terdaftar")
+    return purchaseorders

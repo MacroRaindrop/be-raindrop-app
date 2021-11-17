@@ -1,9 +1,11 @@
+from database import Base
 import pydantic as _pydantic
 from pydantic import BaseModel, Field
 from datetime import datetime
+from typing import List
 
 class CompanyBase(BaseModel):
-    id                  :str
+    id                  :int
     created_at          :datetime
     owner_name          :str
     name                :str
@@ -20,7 +22,7 @@ class CompanyCreate(BaseModel):
     owner_password  :str
 
 class Company(BaseModel):
-    id                  :str
+    id                  :int
     created_at          :datetime
     owner_name          :str
     name                :str
@@ -32,7 +34,7 @@ class CompanyLogin(BaseModel):
 
 
 class StaffBase(BaseModel):
-    id                  :str
+    id                  :int
     created_at          :datetime
     id_company          :str
     name                :str
@@ -44,14 +46,14 @@ class StaffBase(BaseModel):
         orm_mode = True
 
 class StaffCreate(BaseModel):
-    id_company      :str
+    id_company      :int
     name            :str
     email           :str
     password        :str
     role            :str
 
 class Staff(BaseModel):
-    id                  :str
+    id                  :int
     created_at          :datetime
     id_company          :str
     name                :str
@@ -79,15 +81,16 @@ class ProductCreate(BaseModel):
     id_company      :int
     name            :str
     minimum_stock   :int
+    image           :str
     unit            :str
     description     :str
     quantity        :int
 
 class HistoryBase(BaseModel):
-    id                  :str
+    id                  :int
     created_at          :datetime
-    id_company          :str
-    id_product          :str
+    id_company          :int
+    id_product          :int
     inbound             :int
     outbound            :int
     unit                :str
@@ -97,43 +100,54 @@ class HistoryBase(BaseModel):
         orm_mode = True
 
 class HistoryCreate(BaseModel):
-    id_company      :str
-    id_product      :str
+    id_company      :int
+    id_product      :int
     inbound         :int
     outbound        :int
     unit            :str
     notes           :str
 
-class PreOrderBase(BaseModel):
-    id                  :str
+class PurchaseOrderBase(BaseModel):
+    id                  :int
     created_at          :datetime
-    id_company          :str
-    id_product          :str
-    id_staff            :str
+    id_purchaseorder    :int
+    id_company          :int
+    id_staff            :int
     supplier            :str
     date                :str
+
+    class Config:
+        orm_mode = True
+
+class PurchaseOrderDetailBase(BaseModel):
+    id                  :int
+    id_purchaseorder    :int
+    id_product          :int
     quantity            :int
 
     class Config:
         orm_mode = True
 
-class PreOrderCreate(BaseModel):
-    id_company      :str
-    id_product      :str
-    id_staff        :str
-    supplier        :str
-    date            :str
-    quantity        :int
+class PurchaseOrderDetailCreate(BaseModel):
+    id_product          :int
+    quantity            :int
+
+class PurchaseOrderCreate(BaseModel):
+    id_company          :int
+    id_staff            :int
+    supplier            :str
+    date                :str
+    products            :List[PurchaseOrderDetailCreate]
 
 class LogBase(BaseModel):
-    id                  :str
+    id                  :int
     created_at          :datetime
-    id_company          :str
-    id_staff            :str
+    id_company          :int
+    id_staff            :int
 
     class Config:
         orm_mode = True
 
 class LogCreate(BaseModel):
-    id_company      :str
-    id_staff        :str
+    id_company      :int
+    id_staff        :int
