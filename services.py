@@ -216,34 +216,77 @@ def get_purchaseorders_id(db: Session, id_company: int, id_purchaseorder: int):
     return purchaseorder_detail
 
 
-def get_inbounds(db: Session, inbound: schemas.InboundCreate):
+def get_inbounds(db: Session, bound: schemas.BoundCreate):
     purchaseorders = db.query(models.Purchaseorder).filter(
-        models.Purchaseorder.id_company == inbound.id_company).all()
+        models.Purchaseorder.id_company == bound.id_company).all()
     if not purchaseorders:
         return 'companynotfound'
     purchaseorder_detail = db.query(models.PurchaseorderDetail).filter(and_(
-        models.PurchaseorderDetail.id_purchaseorder == inbound.id_purchaseorder, models.PurchaseorderDetail.id_company == inbound.id_company)).all()
+        models.PurchaseorderDetail.id_purchaseorder == bound.id_purchaseorder, models.PurchaseorderDetail.id_company == bound.id_company)).all()
     if not purchaseorder_detail:
         return 'purchaseordernotfound'
     for i in range(len(purchaseorder_detail)):
-        if not purchaseorder_detail[i].id_product == inbound.products[i].id_product:
+        if not purchaseorder_detail[i].id_product == bound.products[i].id_product:
             return 'productsinvalid'
     # history = db.query(models.History)
     histories = []
-    for i in range(len(inbound.products)):
-        id_product = inbound.products[i].id_product
+    for i in range(len(bound.products)):
+        id_product = bound.products[i].id_product
         prod = db.query(models.Product).filter(
             models.Product.id == id_product).first()
-        inquantity = inbound.products[i].quantity
+        inquantity = bound.products[i].quantity
         quantity = prod.quantity + inquantity
+        notes = bound.products[i].notes
         histories.append(
             models.History(
                 created_at=datetime.now(),
-                id_company=inbound.id_company,
+                id_company=bound.id_company,
                 id_product=id_product,
                 inbound=inquantity,
                 outbound=0,
-                notes=inbound.notes
+                notes=notes
+            ))
+        db.execute(
+            update(models.Product).
+            where(models.Product.id == id_product).
+            values(
+                quantity=quantity
+            )
+        )
+    db.add_all(histories)
+    db.commit()
+    return purchaseorder_detail
+
+
+def get_outbounds(db: Session, bound: schemas.BoundCreate):
+    purchaseorders = db.query(models.Purchaseorder).filter(
+        models.Purchaseorder.id_company == bound.id_company).all()
+    if not purchaseorders:
+        return 'companynotfound'
+    purchaseorder_detail = db.query(models.PurchaseorderDetail).filter(and_(
+        models.PurchaseorderDetail.id_purchaseorder == bound.id_purchaseorder, models.PurchaseorderDetail.id_company == bound.id_company)).all()
+    if not purchaseorder_detail:
+        return 'purchaseordernotfound'
+    for i in range(len(purchaseorder_detail)):
+        if not purchaseorder_detail[i].id_product == bound.products[i].id_product:
+            return 'productsinvalid'
+    # history = db.query(models.History)
+    histories = []
+    for i in range(len(bound.products)):
+        id_product = bound.products[i].id_product
+        prod = db.query(models.Product).filter(
+            models.Product.id == id_product).first()
+        outquantity = bound.products[i].quantity
+        quantity = prod.quantity - outquantity
+        notes = bound.products[i].notes
+        histories.append(
+            models.History(
+                created_at=datetime.now(),
+                id_company=bound.id_company,
+                id_product=id_product,
+                inbound=0,
+                outbound=outquantity,
+                notes=notes
             ))
         db.execute(
             update(models.Product).

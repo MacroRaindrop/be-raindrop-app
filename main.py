@@ -149,11 +149,28 @@ def get_purchaseorders_by_id(company_id: int, purchaseorder_id=int, db: orm.Sess
 
 
 @app.post("/inbounds/", response_model=List[schemas.PurchaseOrderDetailBase])
-def get_inbounds(inbound: schemas.InboundCreate, db: orm.Session = _fastapi.Depends(services.get_db)):
-    if not inbound.products:
+def get_inbounds(bound: schemas.BoundCreate, db: orm.Session = _fastapi.Depends(services.get_db)):
+    if not bound.products:
         raise _fastapi.HTTPException(
             status_code=400, detail="List Product tidak boleh kosong")
-    purchaseorder_detail = services.get_inbounds(db=db, inbound=inbound)
+    purchaseorder_detail = services.get_inbounds(db=db, bound=bound)
+    if purchaseorder_detail == 'companynotfound':
+        raise _fastapi.HTTPException(
+            status_code=400, detail="perusahaan belum terdaftar")
+    elif purchaseorder_detail == 'purchaseordernotfound':
+        raise _fastapi.HTTPException(
+            status_code=400, detail="PO belum terdaftar")
+    elif purchaseorder_detail == 'productsinvalid':
+        raise _fastapi.HTTPException(
+            status_code=400, detail="Product tidak sesuai, mohon periksa kembali list barang PO anda")
+    return purchaseorder_detail
+
+@app.post("/outbounds/", response_model=List[schemas.PurchaseOrderDetailBase])
+def get_inbounds(bound: schemas.BoundCreate, db: orm.Session = _fastapi.Depends(services.get_db)):
+    if not bound.products:
+        raise _fastapi.HTTPException(
+            status_code=400, detail="List Product tidak boleh kosong")
+    purchaseorder_detail = services.get_outbounds(db=db, bound=bound)
     if purchaseorder_detail == 'companynotfound':
         raise _fastapi.HTTPException(
             status_code=400, detail="perusahaan belum terdaftar")
