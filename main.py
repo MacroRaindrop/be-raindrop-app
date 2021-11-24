@@ -166,7 +166,7 @@ def get_inbounds(bound: schemas.BoundCreate, db: orm.Session = _fastapi.Depends(
     return purchaseorder_detail
 
 @app.post("/outbounds/", response_model=List[schemas.PurchaseOrderDetailBase])
-def get_inbounds(bound: schemas.BoundCreate, db: orm.Session = _fastapi.Depends(services.get_db)):
+def get_outbounds(bound: schemas.BoundCreate, db: orm.Session = _fastapi.Depends(services.get_db)):
     if not bound.products:
         raise _fastapi.HTTPException(
             status_code=400, detail="List Product tidak boleh kosong")
