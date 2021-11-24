@@ -1,13 +1,17 @@
 from sqlalchemy.sql.expression import null, update
+from sqlalchemy.sql.functions import mode
 import database
 import models
 from sqlalchemy.orm import Session
 import schemas
 from datetime import datetime
+from sqlalchemy import and_
+from typing import List
 
 
 def create_database():
     return database.Base.metadata.create_all(bind=database.engine)
+
 
 def get_db():
     db = database.SessionLocal()
@@ -16,16 +20,20 @@ def get_db():
     finally:
         db.close()
 
+
 def get_company_by_name(db: Session, name: str):
     return db.query(models.Company).filter(models.Company.owner_name == name).first()
+
 
 def get_company_by_email(db: Session, email: str):
     return db.query(models.Company).filter(models.Company.owner_email == email).first()
 
+
 def get_company_by_id(db: Session, id: int):
     return db.query(models.Company).filter(models.Company.id == id).first()
 
-def create_company(db: Session, company: schemas.CompanyCreate ):
+
+def create_company(db: Session, company: schemas.CompanyCreate):
     fake_hashed_password = company.owner_password + "thisisnotsecured"
     db_company = models.Company(
         created_at=datetime.now(),
@@ -47,7 +55,8 @@ def create_company(db: Session, company: schemas.CompanyCreate ):
     )
     return db_company
 
-def create_product(db: Session, product: schemas.ProductCreate ):
+
+def create_product(db: Session, product: schemas.ProductCreate):
     db_product = models.Product(
         created_at=datetime.now(),
         id_company=product.id_company,
@@ -74,14 +83,18 @@ def create_product(db: Session, product: schemas.ProductCreate ):
     )
     return db_product
 
-def get_products(db: Session, skip:int, limit:int):
+
+def get_products(db: Session, skip: int, limit: int):
     return db.query(models.Product).offset(skip).limit(limit).all()
+
 
 def get_product(db: Session, id: int):
     return db.query(models.Product).filter(models.Product.id == id).first()
 
+
 def get_products_by_user(db: Session, id: int):
     return db.query(models.Product).filter(models.Product.id_company == id).all()
+
 
 def update_product(db: Session, product: schemas.ProductBase):
     db.execute(
@@ -98,18 +111,22 @@ def update_product(db: Session, product: schemas.ProductBase):
         )
     )
     db.commit()
-    product =  db.query(models.Product).filter(models.Product.id == product.id).first()
+    product = db.query(models.Product).filter(
+        models.Product.id == product.id).first()
     return product
 
+
 def delete_product(db: Session, id: int):
-    product =  db.query(models.Product).filter(models.Product.id == id).first()
+    product = db.query(models.Product).filter(models.Product.id == id).first()
     db.delete(product)
     db.commit()
     return product
 
-def get_staff(db: Session, id:int):
+
+def get_staff(db: Session, id: int):
     return db.query(models.Staff).filter(models.Staff.id_company == id).all()
-    
+
+
 def create_staff(db: Session, staff: schemas.StaffCreate):
     db_staff = models.Staff(
         created_at=datetime.now(),
@@ -133,8 +150,10 @@ def create_staff(db: Session, staff: schemas.StaffCreate):
     )
     return db_staff
 
+
 def create_purchaseorder(db: Session, purchaseorder: schemas.PurchaseOrderCreate):
-    purchaseorders = db.query(models.Purchaseorder).filter(models.Purchaseorder.id_company==purchaseorder.id_company).all()
+    purchaseorders = db.query(models.Purchaseorder).filter(
+        models.Purchaseorder.id_company == purchaseorder.id_company).all()
     if not purchaseorders:
         id = 1
     else:
@@ -162,15 +181,77 @@ def create_purchaseorder(db: Session, purchaseorder: schemas.PurchaseOrderCreate
     purchaseorderdetails = []
     for i in range(len(purchaseorder.products)):
         purchaseorderdetail = models.PurchaseorderDetail(
-            id_purchaseorder  = db_purchaseorder.id,
-            id_product        = purchaseorder.products[i].id_product,
-            quantity          = purchaseorder.products[i].quantity
+            id_company=db_purchaseorder.id_company,
+            id_purchaseorder=db_purchaseorder.id,
+            id_product=purchaseorder.products[i].id_product,
+            quantity=purchaseorder.products[i].quantity
         )
         purchaseorderdetails.append(purchaseorderdetail)
     db.add_all(purchaseorderdetails)
     db.commit()
-    print(purchaseorderdetails)
-    return purchaseorder
+    result = schemas.PurchaseOrderDetailResponse(
+        id_purchaseorder=db_purchaseorder.id_purchaseorder,
+        id_company=db_purchaseorder.id_company,
+        id_staff=db_purchaseorder.id_staff,
+        supplier=db_purchaseorder.supplier,
+        date=db_purchaseorder.date,
+        products=purchaseorder.products
+    )
+    return result
+
 
 def get_purchaseorders(db: Session, id: int):
-    return db.query(models.Purchaseorder).filter(models.Purchaseorder.id_company==id).all()
+    return db.query(models.Purchaseorder).filter(models.Purchaseorder.id_company == id).all()
+
+
+def get_purchaseorders_id(db: Session, id_company: int, id_purchaseorder: int):
+    purchaseorders = db.query(models.Purchaseorder).filter(
+        models.Purchaseorder.id_company == id_company).all()
+    if not purchaseorders:
+        return 'companynotfound'
+    purchaseorder_detail = db.query(models.PurchaseorderDetail).filter(and_(
+        models.PurchaseorderDetail.id_purchaseorder == id_purchaseorder, models.PurchaseorderDetail.id_company == id_company)).first()
+    if not purchaseorder_detail:
+        return 'purchaseordernotfound'
+    return purchaseorder_detail
+
+
+def get_inbounds(db: Session, inbound: schemas.InboundCreate):
+    purchaseorders = db.query(models.Purchaseorder).filter(
+        models.Purchaseorder.id_company == inbound.id_company).all()
+    if not purchaseorders:
+        return 'companynotfound'
+    purchaseorder_detail = db.query(models.PurchaseorderDetail).filter(and_(
+        models.PurchaseorderDetail.id_purchaseorder == inbound.id_purchaseorder, models.PurchaseorderDetail.id_company == inbound.id_company)).all()
+    if not purchaseorder_detail:
+        return 'purchaseordernotfound'
+    for i in range(len(purchaseorder_detail)):
+        if not purchaseorder_detail[i].id_product == inbound.products[i].id_product:
+            return 'productsinvalid'
+    # history = db.query(models.History)
+    histories = []
+    for i in range(len(inbound.products)):
+        id_product = inbound.products[i].id_product
+        prod = db.query(models.Product).filter(
+            models.Product.id == id_product).first()
+        inquantity = inbound.products[i].quantity
+        quantity = prod.quantity + inquantity
+        histories.append(
+            models.History(
+                created_at=datetime.now(),
+                id_company=inbound.id_company,
+                id_product=id_product,
+                inbound=inquantity,
+                outbound=0,
+                notes=inbound.notes
+            ))
+        db.execute(
+            update(models.Product).
+            where(models.Product.id == id_product).
+            values(
+                quantity=quantity
+            )
+        )
+    db.add_all(histories)
+    db.commit()
+    return purchaseorder_detail
