@@ -17,6 +17,7 @@ class Company(Base):
     staff           = relationship("Staff", back_populates="company")
     histories       = relationship("History", back_populates="company")
     purchaseorders       = relationship("Purchaseorder", back_populates="company")
+    purchaseorderdetails       = relationship("PurchaseorderDetail", back_populates="company")
     logs            = relationship("Log", back_populates="company")
 
 class Staff(Base):
@@ -46,6 +47,9 @@ class Product(Base):
     quantity        = Column(Integer)
     histories       = relationship("History", back_populates="products")
     purchaseorderdetails       = relationship("PurchaseorderDetail", back_populates="products")
+    def __eq__(self, other):
+        return self.id == other.id
+
 
 class History(Base):
     __tablename__ = 'history'
@@ -57,7 +61,6 @@ class History(Base):
     products         = relationship("Product", back_populates="histories")
     inbound         = Column(String)
     outbound        = Column(Integer)
-    unit            = Column(Integer)
     notes           = Column(String)
 
 class Purchaseorder(Base):
@@ -76,6 +79,8 @@ class Purchaseorder(Base):
 class PurchaseorderDetail(Base):
     __tablename__        = 'purchaseorder_detail'
     id                   = Column(Integer, primary_key=True, index=True)
+    id_company           = Column(Integer, ForeignKey('company.id'))
+    company              = relationship("Company", back_populates="purchaseorderdetails")
     id_purchaseorder     = Column(Integer, ForeignKey('purchaseorder.id'))
     purchaseorders       = relationship("Purchaseorder", back_populates="purchaseorderdetails")
     id_product           = Column(Integer, ForeignKey('product.id'))

@@ -102,7 +102,7 @@ def get_company_staff(company_id: int, db: orm.Session=_fastapi.Depends(services
 def create_staff(staff: schemas.StaffCreate, db: orm.Session=_fastapi.Depends(services.get_db)):
     return services.create_staff(staff=staff, db=db)
 
-@app.post("/purchaseorders", response_model=schemas.PurchaseOrderCreate)
+@app.post("/purchaseorders", response_model=schemas.PurchaseOrderDetailResponse)
 def create_purchaseorder(purchaseorder: schemas.PurchaseOrderCreate, db: orm.Session=_fastapi.Depends(services.get_db)):
     return services.create_purchaseorder(purchaseorder=purchaseorder, db=db)
 
@@ -112,3 +112,25 @@ def get_purchaseorders_by_company(company_id: int, db: orm.Session=_fastapi.Depe
     if not purchaseorders:
         raise _fastapi.HTTPException(status_code=400, detail="perusahaan belum terdaftar")
     return purchaseorders
+
+@app.get("/purchaseorders/{purchaseorder_id}", response_model=schemas.PurchaseOrderDetailBase)
+def get_purchaseorders_by_id(company_id: int, purchaseorder_id=int, db: orm.Session=_fastapi.Depends(services.get_db)):
+    purchaseorder_detail = services.get_purchaseorders_id(db=db, id_company=company_id, id_purchaseorder=purchaseorder_id)
+    if purchaseorder_detail == 'companynotfound':
+        raise _fastapi.HTTPException(status_code=400, detail="perusahaan belum terdaftar")
+    elif purchaseorder_detail == 'purchaseordernotfound':
+        raise _fastapi.HTTPException(status_code=400, detail="PO belum terdaftar")
+    return purchaseorder_detail
+
+@app.post("/inbounds/", response_model=List[schemas.PurchaseOrderDetailBase])
+def get_inbounds(inbound: schemas.InboundCreate, db: orm.Session=_fastapi.Depends(services.get_db)):
+    if not inbound.products:
+        raise _fastapi.HTTPException(status_code=400, detail="List Product tidak boleh kosong")
+    purchaseorder_detail = services.get_inbounds(db=db, inbound=inbound)
+    if purchaseorder_detail == 'companynotfound':
+        raise _fastapi.HTTPException(status_code=400, detail="perusahaan belum terdaftar")
+    elif purchaseorder_detail == 'purchaseordernotfound':
+        raise _fastapi.HTTPException(status_code=400, detail="PO belum terdaftar")
+    elif purchaseorder_detail == 'productsinvalid':
+        raise _fastapi.HTTPException(status_code=400, detail="Product tidak sesuai, mohon periksa kembali list barang PO anda")
+    return purchaseorder_detail

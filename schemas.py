@@ -104,7 +104,6 @@ class HistoryCreate(BaseModel):
     id_product      :int
     inbound         :int
     outbound        :int
-    unit            :str
     notes           :str
 
 class PurchaseOrderBase(BaseModel):
@@ -121,6 +120,7 @@ class PurchaseOrderBase(BaseModel):
 
 class PurchaseOrderDetailBase(BaseModel):
     id                  :int
+    id_company          :int
     id_purchaseorder    :int
     id_product          :int
     quantity            :int
@@ -138,6 +138,20 @@ class PurchaseOrderCreate(BaseModel):
     supplier            :str
     date                :str
     products            :List[PurchaseOrderDetailCreate]
+
+class PurchaseOrderDetailResponse(BaseModel):
+    id_purchaseorder    :int
+    id_company          :int
+    id_staff            :int
+    supplier            :str
+    date                :str
+    products            :List[PurchaseOrderDetailCreate]
+
+class InboundCreate(BaseModel):
+    id_company          :int
+    id_purchaseorder    :int
+    products            :List[PurchaseOrderDetailCreate]
+    notes               :str
 
 class LogBase(BaseModel):
     id                  :int
