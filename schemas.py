@@ -162,12 +162,16 @@ class PurchaseOrderDetailResponse(BaseModel):
     date: str
     products: List[PurchaseOrderDetailCreate]
 
+class BoundProducts(BaseModel):
+    id_product: int
+    quantity: int
+    notes: str
 
-class InboundCreate(BaseModel):
+
+class BoundCreate(BaseModel):
     id_company: int
     id_purchaseorder: int
-    products: List[PurchaseOrderDetailCreate]
-    notes: str
+    products: List[BoundProducts]
 
 
 class LogBase(BaseModel):
