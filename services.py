@@ -232,13 +232,15 @@ def get_inbounds(db: Session, inbound: schemas.InboundCreate):
     histories = []
     for i in range(len(inbound.products)):
         id_product = inbound.products[i].id_product
-        quantity = inbound.products[i].quantity
+        prod = db.query(models.Product).filter(models.Product.id==id_product).first()
+        inquantity = inbound.products[i].quantity
+        quantity = prod.quantity + inquantity
         histories.append(
             models.History(
                 created_at=datetime.now(),
                 id_company=inbound.id_company,
                 id_product=id_product,
-                inbound=quantity,
+                inbound=inquantity,
                 outbound=0,
                 notes=inbound.notes
         ))
