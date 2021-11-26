@@ -199,3 +199,11 @@ def get_no_stock(company_id: int, db: orm.Session = _fastapi.Depends(services.ge
         raise _fastapi.HTTPException(
             status_code=400, detail="perusahaan belum terdaftar")
     return nostock
+
+# @app.get("/discontinued", response_model=List[schemas.ProductBase])
+# def get_discontinued(company_id: int, db: orm.Session = _fastapi.Depends(services.get_db)):
+#     nostock = services.get_discontinued(id=company_id, db=db)
+#     if nostock=='companynotfound':
+#         raise _fastapi.HTTPException(
+#             status_code=400, detail="perusahaan belum terdaftar")
+#     return nostock

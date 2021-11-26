@@ -334,3 +334,23 @@ def get_no_stock(db: Session, id: int):
             nostock.append(products[i])
     print(nostock)
     return nostock
+
+def get_discontinued(db: Session, id: int):
+    products =  db.query(models.Product).filter(models.Product.id_company == id).all()
+    if not products:
+        return 'companynotfound'
+    discontinued = []
+    purchasorders_detail = db.query(models.PurchaseorderDetail).filter((models.PurchaseorderDetail.id_company)).all()
+
+    def diff_month(d1, d2):
+        return (d1.year - d2.year) * 12 + d1.month - d2.month
+
+    for i in range(len(purchasorders_detail)):
+        for j in range(len(products)):
+            if purchasorders_detail[i].id_product == products[j].id:
+                purchaseoder = db.query(models.Purchaseorder).filter(and_(models.Purchaseorder.id_company==id, models.Purchaseorder.id_purchaseorder==purchasorders_detail[i].id_purchaseorder)).first()
+                if diff_month(purchaseoder.date, datetime.now()):
+                    discontinued.append(products[j])
+    
+    print(discontinued)
+    return discontinued
