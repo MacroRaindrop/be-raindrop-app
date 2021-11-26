@@ -182,7 +182,7 @@ def create_purchaseorder(db: Session, purchaseorder: schemas.PurchaseOrderCreate
     for i in range(len(purchaseorder.products)):
         purchaseorderdetail = models.PurchaseorderDetail(
             id_company=db_purchaseorder.id_company,
-            id_purchaseorder=db_purchaseorder.id,
+            id_purchaseorder=db_purchaseorder.id_purchaseorder,
             id_product=purchaseorder.products[i].id_product,
             quantity=purchaseorder.products[i].quantity
         )
@@ -205,15 +205,28 @@ def get_purchaseorders(db: Session, id: int):
 
 
 def get_purchaseorders_id(db: Session, id_company: int, id_purchaseorder: int):
-    purchaseorders = db.query(models.Purchaseorder).filter(
-        models.Purchaseorder.id_company == id_company).all()
+    purchaseorders = db.query(models.Purchaseorder).filter(models.Purchaseorder.id_company == id_company).all()
     if not purchaseorders:
         return 'companynotfound'
+    purchaseorders = db.query(models.Purchaseorder).filter(and_(models.Purchaseorder.id_purchaseorder == id_purchaseorder, models.Purchaseorder.id_company==id_company)).first()
     purchaseorder_detail = db.query(models.PurchaseorderDetail).filter(and_(
-        models.PurchaseorderDetail.id_purchaseorder == id_purchaseorder, models.PurchaseorderDetail.id_company == id_company)).first()
+        models.PurchaseorderDetail.id_purchaseorder == id_purchaseorder, models.PurchaseorderDetail.id_company == id_company)).all()
     if not purchaseorder_detail:
         return 'purchaseordernotfound'
-    return purchaseorder_detail
+
+    products = []
+    for i in range(len(purchaseorder_detail)):
+        products.append(purchaseorder_detail[i].products)
+    print(products)
+    response = schemas.PurchaseOrderDetailResponse(
+        id_purchaseorder=purchaseorders.id_purchaseorder,
+        id_company=purchaseorders.id_company,
+        id_staff=purchaseorders.id_staff,
+        supplier=purchaseorders.supplier,
+        date=purchaseorders.date,
+        products=products
+    )
+    return response
 
 
 def get_inbounds(db: Session, bound: schemas.BoundCreate):

@@ -135,7 +135,7 @@ def get_purchaseorders_by_company(company_id: int, db: orm.Session = _fastapi.De
     return purchaseorders
 
 
-@app.get("/purchaseorders/{purchaseorder_id}", response_model=schemas.PurchaseOrderDetailBase)
+@app.get("/purchaseorders/{purchaseorder_id}", response_model=schemas.PurchaseOrderDetailResponse)
 def get_purchaseorders_by_id(company_id: int, purchaseorder_id=int, db: orm.Session = _fastapi.Depends(services.get_db)):
     purchaseorder_detail = services.get_purchaseorders_id(
         db=db, id_company=company_id, id_purchaseorder=purchaseorder_id)
@@ -145,6 +145,7 @@ def get_purchaseorders_by_id(company_id: int, purchaseorder_id=int, db: orm.Sess
     elif purchaseorder_detail == 'purchaseordernotfound':
         raise _fastapi.HTTPException(
             status_code=400, detail="PO belum terdaftar")
+    print(purchaseorder_detail)
     return purchaseorder_detail
 
 
