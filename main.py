@@ -135,7 +135,7 @@ def get_purchaseorders_by_company(company_id: int, db: orm.Session = _fastapi.De
     return purchaseorders
 
 
-@app.get("/purchaseorders/{purchaseorder_id}", response_model=schemas.PurchaseOrderDetailBase)
+@app.get("/purchaseorders/{purchaseorder_id}", response_model=schemas.PurchaseOrderDetailResponse)
 def get_purchaseorders_by_id(company_id: int, purchaseorder_id=int, db: orm.Session = _fastapi.Depends(services.get_db)):
     purchaseorder_detail = services.get_purchaseorders_id(
         db=db, id_company=company_id, id_purchaseorder=purchaseorder_id)
@@ -145,6 +145,7 @@ def get_purchaseorders_by_id(company_id: int, purchaseorder_id=int, db: orm.Sess
     elif purchaseorder_detail == 'purchaseordernotfound':
         raise _fastapi.HTTPException(
             status_code=400, detail="PO belum terdaftar")
+    print(purchaseorder_detail)
     return purchaseorder_detail
 
 
@@ -166,7 +167,7 @@ def get_inbounds(bound: schemas.BoundCreate, db: orm.Session = _fastapi.Depends(
     return purchaseorder_detail
 
 @app.post("/outbounds/", response_model=List[schemas.PurchaseOrderDetailBase])
-def get_inbounds(bound: schemas.BoundCreate, db: orm.Session = _fastapi.Depends(services.get_db)):
+def get_outbounds(bound: schemas.BoundCreate, db: orm.Session = _fastapi.Depends(services.get_db)):
     if not bound.products:
         raise _fastapi.HTTPException(
             status_code=400, detail="List Product tidak boleh kosong")
@@ -181,3 +182,28 @@ def get_inbounds(bound: schemas.BoundCreate, db: orm.Session = _fastapi.Depends(
         raise _fastapi.HTTPException(
             status_code=400, detail="Product tidak sesuai, mohon periksa kembali list barang PO anda")
     return purchaseorder_detail
+
+
+@app.get("/low-stock", response_model=List[schemas.ProductBase])
+def get_low_stock(company_id: int, db: orm.Session = _fastapi.Depends(services.get_db)):
+    lowstock = services.get_low_stock(id=company_id, db=db)
+    if lowstock=='companynotfound':
+        raise _fastapi.HTTPException(
+            status_code=400, detail="perusahaan belum terdaftar")
+    return lowstock
+
+@app.get("/no-stock", response_model=List[schemas.ProductBase])
+def get_no_stock(company_id: int, db: orm.Session = _fastapi.Depends(services.get_db)):
+    nostock = services.get_no_stock(id=company_id, db=db)
+    if nostock=='companynotfound':
+        raise _fastapi.HTTPException(
+            status_code=400, detail="perusahaan belum terdaftar")
+    return nostock
+
+# @app.get("/discontinued", response_model=List[schemas.ProductBase])
+# def get_discontinued(company_id: int, db: orm.Session = _fastapi.Depends(services.get_db)):
+#     nostock = services.get_discontinued(id=company_id, db=db)
+#     if nostock=='companynotfound':
+#         raise _fastapi.HTTPException(
+#             status_code=400, detail="perusahaan belum terdaftar")
+#     return nostock
