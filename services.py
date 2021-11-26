@@ -319,7 +319,7 @@ def get_low_stock(db: Session, id: int):
         return 'companynotfound'
     lowstock = []
     for i in range(len(products)):
-        if products[i].quantity < products[i].minimum_stock:
+        if products[i].quantity < products[i].minimum_stock and products[id].quantity > 0:
             lowstock.append(products[i])
     print(lowstock)
     return lowstock
