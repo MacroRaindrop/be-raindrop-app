@@ -323,3 +323,14 @@ def get_low_stock(db: Session, id: int):
             lowstock.append(products[i])
     print(lowstock)
     return lowstock
+
+def get_no_stock(db: Session, id: int):
+    products =  db.query(models.Product).filter(models.Product.id_company == id).all()
+    if not products:
+        return 'companynotfound'
+    nostock = []
+    for i in range(len(products)):
+        if products[i].quantity == 0:
+            nostock.append(products[i])
+    print(nostock)
+    return nostock

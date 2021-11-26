@@ -191,3 +191,11 @@ def get_low_stock(company_id: int, db: orm.Session = _fastapi.Depends(services.g
         raise _fastapi.HTTPException(
             status_code=400, detail="perusahaan belum terdaftar")
     return lowstock
+
+@app.get("/no-stock", response_model=List[schemas.ProductBase])
+def get_no_stock(company_id: int, db: orm.Session = _fastapi.Depends(services.get_db)):
+    nostock = services.get_no_stock(id=company_id, db=db)
+    if nostock=='companynotfound':
+        raise _fastapi.HTTPException(
+            status_code=400, detail="perusahaan belum terdaftar")
+    return nostock
