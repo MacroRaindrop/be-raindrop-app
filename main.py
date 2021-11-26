@@ -182,3 +182,12 @@ def get_outbounds(bound: schemas.BoundCreate, db: orm.Session = _fastapi.Depends
         raise _fastapi.HTTPException(
             status_code=400, detail="Product tidak sesuai, mohon periksa kembali list barang PO anda")
     return purchaseorder_detail
+
+
+@app.get("/low-stock", response_model=List[schemas.ProductBase])
+def get_low_stock(company_id: int, db: orm.Session = _fastapi.Depends(services.get_db)):
+    lowstock = services.get_low_stock(id=company_id, db=db)
+    if lowstock=='companynotfound':
+        raise _fastapi.HTTPException(
+            status_code=400, detail="perusahaan belum terdaftar")
+    return lowstock

@@ -311,3 +311,15 @@ def get_outbounds(db: Session, bound: schemas.BoundCreate):
     db.add_all(histories)
     db.commit()
     return purchaseorder_detail
+
+
+def get_low_stock(db: Session, id: int):
+    products =  db.query(models.Product).filter(models.Product.id_company == id).all()
+    if not products:
+        return 'companynotfound'
+    lowstock = []
+    for i in range(len(products)):
+        if products[i].quantity < products[i].minimum_stock:
+            lowstock.append(products[i])
+    print(lowstock)
+    return lowstock
