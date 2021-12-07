@@ -4,7 +4,7 @@ import database
 import models
 from sqlalchemy.orm import Session
 import schemas
-from datetime import datetime
+from datetime import date, datetime
 from sqlalchemy import and_
 from typing import List
 
@@ -268,6 +268,7 @@ def get_inbounds(db: Session, bound: schemas.BoundCreate):
         )
     db.add_all(histories)
     db.commit()
+    db.refresh(purchaseorder_detail)
     return purchaseorder_detail
 
 
@@ -354,3 +355,16 @@ def get_discontinued(db: Session, id: int):
     
     print(discontinued)
     return discontinued
+
+def get_today_outbound(db: Session, id: int):
+    histories =  db.query(models.History).filter(models.History.id_company == id).all()
+    if not histories:
+        return 'companynotfound'
+    today_outbound = []
+    for i in range(len(histories)):
+        if histories[i].outbound > 0 and histories[i].created_at.date()==datetime.today().date():
+            today_outbound.append(schemas.TodayOutbound(
+                product=histories[i].id_product,
+                outbound=histories[i].outbound
+            ))
+    return today_outbound

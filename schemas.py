@@ -187,3 +187,8 @@ class LogBase(BaseModel):
 class LogCreate(BaseModel):
     id_company: int
     id_staff: int
+
+
+class TodayOutbound(BaseModel):
+    product: int
+    outbound: int

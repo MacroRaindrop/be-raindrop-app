@@ -207,3 +207,11 @@ def get_no_stock(company_id: int, db: orm.Session = _fastapi.Depends(services.ge
 #         raise _fastapi.HTTPException(
 #             status_code=400, detail="perusahaan belum terdaftar")
 #     return nostock
+
+@app.get("/today-outbound", response_model=List[schemas.TodayOutbound])
+def get_today_outbound(company_id: int, db: orm.Session = _fastapi.Depends(services.get_db)):
+    outbound = services.get_today_outbound(id=company_id, db=db)
+    if outbound=='companynotfound':
+        raise _fastapi.HTTPException(
+            status_code=400, detail="perusahaan belum terdaftar")
+    return outbound
